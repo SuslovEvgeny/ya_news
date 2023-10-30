@@ -5,6 +5,9 @@ from django.urls import reverse
 from pytest_django.asserts import assertRedirects
 
 
+pytestmark = [pytest.mark.django_db]
+
+
 @pytest.mark.parametrize(
     'name, args',
     (
@@ -13,14 +16,17 @@ from pytest_django.asserts import assertRedirects
     ),
 )
 def test_redirect_for_anonymous_client(client, name, args):
+    """Проверка редиректов."""
     login_url = reverse('users:login')
     url = reverse(name, args=args)
     expected_url = f'{login_url}?next={url}'
     response = client.get(url)
-    assertRedirects(response, expected_url)
+    assertRedirects(response, expected_url), (
+        'Убедитесь, что при запросе на удаление и редактирование,'
+        'Незарегистрированный пользователь перенаправляется на регистрацию.'
+    )
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize(
     'name, args',
     (
@@ -32,9 +38,12 @@ def test_redirect_for_anonymous_client(client, name, args):
     ),
 )
 def test_pages_availability(client, name, args):
+    """Проверка доступности страниц."""
     url = reverse(name, args=args)
     response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK, (
+        f'Убедитесь, что страница {url} доступна.'
+    )
 
 
 @pytest.mark.parametrize(
@@ -51,6 +60,9 @@ def test_pages_availability(client, name, args):
 def test_availability_for_comment_edit_and_delete(
         parametrized_client, name, id_for_comment, expected_status
 ):
+    """Проверка доступности для удаления и редактирования комментария."""
     url = reverse(name, args=(id_for_comment))
     response = parametrized_client.get(url)
-    assert response.status_code == expected_status
+    assert response.status_code == expected_status, (
+        'Убедитесь, что удаление и редактирование доступны только автору.'
+    )
