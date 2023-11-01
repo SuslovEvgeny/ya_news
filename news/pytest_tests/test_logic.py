@@ -42,12 +42,12 @@ def test_anonymous_user_cant_create_comment(client, form_data, id_for_news):
 
 
 @pytest.mark.parametrize(
-    'bad_words_list',
-    (BAD_WORDS),
+    'bad_word',
+    BAD_WORDS,
 )
-def test_user_cant_use_bad_words(author_client, id_for_news, bad_words_list):
+def test_user_cant_use_bad_words(author_client, id_for_news, bad_word):
     """Плохи слова в комментариях."""
-    bad_words_data = {'text': f'Какой-то текст, {bad_words_list}, еще текст'}
+    bad_words_data = {'text': f'Какой-то текст, {bad_word}, еще текст'}
     url = reverse('news:detail', args=id_for_news)
     response = author_client.post(url, data=bad_words_data)
     assertFormError(
